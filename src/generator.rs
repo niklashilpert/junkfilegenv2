@@ -1,7 +1,7 @@
 use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Read, Write}, path::Path};
 
-pub fn generate_file(path_str: &str, size: usize) {
-    match open_file(path_str) {
+pub fn generate_file(path_str: &str, size: usize, overwrite: bool) {
+    match open_file(path_str, overwrite) {
         Ok(file) => {
             write_content(file, size);
         },
@@ -19,13 +19,13 @@ pub fn generate_file(path_str: &str, size: usize) {
     };
 }
 
-fn open_file(path_str: &str) -> io::Result<File> {
+fn open_file(path_str: &str, overwrite: bool) -> io::Result<File> {
     let path = Path::new(path_str);
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
 
-    if path.is_file() {
+    if path.is_file() && !overwrite {
         let already_exists_message = "The file you are trying to create already exists.\nDo you want to overwrite it? [y/N]: ";
         let input = read_user_input(&already_exists_message).to_lowercase();
 
@@ -52,6 +52,7 @@ fn read_user_input(input_string: &str) -> String {
 
 
 fn write_content(mut file: File, size: usize) {
+    println!("Generating file...");    
     let mut bytes_left = size;
     let buffer_size = 1024;
     let mut random_file: File = File::open("/dev/random").unwrap();

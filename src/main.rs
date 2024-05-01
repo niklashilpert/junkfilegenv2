@@ -10,10 +10,13 @@ struct Args {
 
     #[arg(short, long)]
     size: usize,
+
+    #[arg(short, long, default_value_t = false)]
+    overwrite: bool,
 }
 
 
 fn main() {
     let args = Args::parse();
-    generator::generate_file(&args.path, args.size)
+    generator::generate_file(&args.path, args.size, args.overwrite)
 }

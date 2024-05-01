@@ -8,8 +8,14 @@ With this tool, you can create files filled with random characters. This can hel
 To generate a file, compile the project and execute it with the following commandline arguments:
 
 ```
-./junkfilegenv2 -p <path of the file> -s <size in bytes>
+./junkfilegenv2 -p <path of the file> -s <size in bytes> [-o]
 ```
+
+Explanation of the parameters:
+
+- the `-p` parameter specifies the path of the file to be created.
+- the `-s` parameter specifies the size of the file.
+- the `-o` flag tells the program to always generate the file even if another file already exists at the given path. If this flag is not set, you will be prompted during execution.
 
 ## Why v2?
 This is a rewrite of the Junkfile Generator.
