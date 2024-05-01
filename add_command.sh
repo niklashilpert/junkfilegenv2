@@ -20,7 +20,8 @@ do
             shift
             ;;
         *)
-            echo Unrecognized commandline argument $1. Exiting...
+            echo Unrecognized commandline argument $1. 
+            echo Exiting...
             exit
             ;;
     esac
@@ -29,7 +30,8 @@ done
 target_path="/bin/$name"
 
 if [ -f "$target_path" ]; then
-    echo A command with the name \'$name\' already exists. 
+    echo A command with the name \'$name\' already exists.
+    echo Exiting... 
     exit
 fi
 
