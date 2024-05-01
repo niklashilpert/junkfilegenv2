@@ -37,6 +37,7 @@ fn open_file(path_str: &str, overwrite: bool) -> io::Result<File> {
     return OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(true)
         .open(path);
 }
 
