@@ -9,7 +9,7 @@ struct Args {
     path: String,
 
     #[arg(short, long)]
-    size: u64,
+    size: usize,
 }
 
 
