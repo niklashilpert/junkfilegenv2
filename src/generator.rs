@@ -1,9 +1,15 @@
-use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Read, Write}, path::Path};
+use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path};
 
-pub fn generate_file(path_str: &str, size: usize, overwrite: bool) {
+use crate::content::{PrintableCharProvider, BinaryProvider, ContentProvider};
+
+pub fn generate_file(path_str: &str, size: usize, overwrite: bool, limit_charset: bool) {
     match open_file(path_str, overwrite) {
         Ok(file) => {
-            write_content(file, size);
+            if limit_charset {
+                write_content(file, size, &mut PrintableCharProvider::new());
+            } else {
+                write_content(file, size, &mut BinaryProvider::new());
+            }
         },
         Err(e) => {
             match e.kind() {
@@ -51,17 +57,16 @@ fn read_user_input(input_string: &str) -> String {
         return trimmed_buf;
 }
 
-
-fn write_content(mut file: File, size: usize) {
-    println!("Generating file...");    
+fn write_content(mut file: File, size: usize, content_provider: &mut impl ContentProvider) {
+    println!("Generating file...");
     let mut bytes_left = size;
     let buffer_size = 1024;
-    let mut random_file: File = File::open("/dev/random").unwrap();
 
     while bytes_left > 0 {
         let batch_size = min(bytes_left, buffer_size);
         let mut buf = vec![0; batch_size];
-        _ = random_file.read_exact(&mut buf);
+
+        _ = content_provider.fill_buf(&mut buf);
         _ = file.write(&buf);
 
         bytes_left -= batch_size;

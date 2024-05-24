@@ -16,6 +16,8 @@ Explanation of the parameters:
 - the `-p` parameter specifies the path of the file to be created.
 - the `-s` parameter specifies the size of the file.
 - the `-o` flag tells the program to always generate the file even if another file already exists at the given path. If this flag is not set, you will be prompted during execution.
+- the `-a` flag changes the rng generator to only output readable characters. See `PRINTABLE_CHARS` string in `content.rs`.
+
 
 ## Adding the tool as a terminal command
 
