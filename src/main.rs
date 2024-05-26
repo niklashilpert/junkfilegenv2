@@ -6,7 +6,6 @@ use clap::Parser;
 
 use crate::content::{BinaryProvider, ContentProvider, PrintableCharProvider};
 
-// Command line argument parser
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {

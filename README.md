@@ -8,7 +8,7 @@ With this tool, you can create files filled with random characters. This can hel
 To generate a file, compile the project and execute it with the following commandline arguments:
 
 ```
-./junkfilegenv2 -p <path of the file> -s <size in bytes> [-o]
+./junkfilegenv2 -p <path of the file> -s <size in bytes> [-o] [-l] [-d]
 ```
 
 Explanation of the parameters:
@@ -16,7 +16,8 @@ Explanation of the parameters:
 - the `-p` parameter specifies the path of the file to be created.
 - the `-s` parameter specifies the size of the file.
 - the `-o` flag tells the program to always generate the file even if another file already exists at the given path. If this flag is not set, you will be prompted during execution.
-- the `-a` flag changes the rng generator to only output readable characters. See `PRINTABLE_CHARS` string in `content.rs`.
+- the `-l` flag changes the rng generator to only output readable characters. See `PRINTABLE_CHARS` string in `content.rs`.
+- the `-d` flag tells the program to always use `rand` as the option to retrieve random bytes.
 
 
 ## Adding the tool as a terminal command
@@ -37,6 +38,6 @@ Explanation of the parameters:
 This is a rewrite of the Junkfile Generator.
 
 It uses `clap` to parse the commandline arguments and the Linux file `/dev/random` as the source for random characters.
-This means that is will only work on machines that run Linux.
+If `/dev/random` is not available, `rand` is used to retrieve random bytes.
 
-The reason for the change to `/dev/random` is the incredible performance boost over the `rand` version.
+The reason for the change to `/dev/random` is the incredible performance boost over `rand`.
