@@ -41,7 +41,6 @@ fn get_factor(capture_opt: Option<Match>) -> usize {
 
 fn randomize_around(value: usize, variance: f64) -> isize {
     let difference = (value as f64 * variance) as isize;
-    println!("{}", difference);
     return thread_rng().gen_range(-difference..=difference)
 }
 
@@ -49,7 +48,6 @@ fn parse_without_dot(number_capture: Option<Match>, factor: usize, random_varian
     let num_str = number_capture.unwrap().as_str();
     let num = num_str.parse::<usize>().unwrap();
     let generated_number = randomize_around(factor, random_variance);
-    println!("{}", generated_number);
     return Some(((num*factor) as isize + generated_number) as usize)
 }
 
@@ -77,9 +75,6 @@ fn parse_with_dot(
     
     let number_before_randomizing = left_num * factor + right_num * existing_numbers_factor;
     let generated_number = randomize_around(existing_numbers_factor, random_variance);
-
-    println!("{}", generated_number);
-
 
     return Some((number_before_randomizing as isize + generated_number) as usize);
 }
