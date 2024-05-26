@@ -1,3 +1,4 @@
+mod numbers;
 mod content;
 
 use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path, time};
@@ -13,7 +14,7 @@ pub struct Args {
     path: String,
 
     #[arg(short, long)]
-    size: usize,
+    size: String,
 
     #[arg(short, long, default_value_t = false)]
     overwrite: bool,
@@ -27,31 +28,38 @@ pub struct Args {
 
 
 fn main() {
-    generate_file(Args::parse());
+    generate_file(Args::parse())
 }
 
 
 pub fn generate_file(args: Args) {
-    match open_file(&args.path, args.overwrite) {
-        Ok(file) => {
-            if args.limit_charset {
-                write_content(file, args.size, &mut PrintableCharProvider::new());
-            } else {
-                write_content(file, args.size, &mut BinaryProvider::new(args.always_use_default));
-            }
-        },
-        Err(e) => {
-            match e.kind() {
-                io::ErrorKind::AlreadyExists => {
-                    println!("Aborting.");
+    match numbers::to_file_size(&args.size, 0.2)  {
+        Some(size) => {
+            match open_file(&args.path, args.overwrite) {
+                Ok(file) => {
+                    if args.limit_charset {
+                        write_content(file, size, &mut PrintableCharProvider::new());
+                    } else {
+                        write_content(file, size, &mut BinaryProvider::new(args.always_use_default));
+                    }
                 },
-                _ => {
-                    let formatted_kind = e.kind().to_string().to_uppercase();
-                    println!("[{}] An error occured whilst trying to open file '{}'.", formatted_kind, args.path);
+                Err(e) => {
+                    match e.kind() {
+                        io::ErrorKind::AlreadyExists => {
+                            println!("Aborting.");
+                        },
+                        _ => {
+                            let formatted_kind = e.kind().to_string().to_uppercase();
+                            println!("[{}] An error occured whilst trying to open file '{}'.", formatted_kind, args.path);
+                        },
+                    }
                 },
-            }
+            };
         },
-    };
+        None => {
+            println!("Could not parse size string.");
+        },
+    }
 }
 
 fn open_file(path_str: &str, overwrite: bool) -> io::Result<File> {
@@ -87,7 +95,7 @@ fn read_user_input(input_string: &str) -> String {
 }
 
 fn write_content(mut file: File, size: usize, content_provider: &mut impl ContentProvider) {
-    println!("Generating file...");
+    println!("Generating file... ({} Bytes)", size);
     let start_time = time::Instant::now();
 
     let mut bytes_left = size;
