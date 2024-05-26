@@ -11,22 +11,24 @@ pub trait ContentProvider {
 
 pub struct PrintableCharProvider {
     source: ThreadRng,
+    chars: Vec<char>,
 }
 
 impl PrintableCharProvider {
     pub fn new() -> Self {
         PrintableCharProvider{
             source: thread_rng(),
+            chars: PRINTABLE_CHARS.chars().collect(),
         }
     }
 }
 
 impl ContentProvider for PrintableCharProvider {
     fn fill_buf(&mut self, buf: &mut Vec<u8>) -> io::Result<()> {
-        let len = PRINTABLE_CHARS.chars().count();
+        let len = self.chars.len();
         for i in 0..buf.len() {
             let index = self.source.gen_range(0..len);
-            buf[i] = PRINTABLE_CHARS.chars().nth(index).unwrap() as u8;
+            buf[i] = self.chars[index] as u8;
         }
         Ok(())
     }

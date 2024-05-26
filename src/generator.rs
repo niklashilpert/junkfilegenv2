@@ -1,4 +1,4 @@
-use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path};
+use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path, time};
 
 use crate::{content::{BinaryProvider, ContentProvider, PrintableCharProvider}, Args};
 
@@ -59,6 +59,8 @@ fn read_user_input(input_string: &str) -> String {
 
 fn write_content(mut file: File, size: usize, content_provider: &mut impl ContentProvider) {
     println!("Generating file...");
+    let start_time = time::Instant::now();
+
     let mut bytes_left = size;
     let buffer_size = 1024;
 
@@ -73,5 +75,10 @@ fn write_content(mut file: File, size: usize, content_provider: &mut impl Conten
 
         print!("\rProgress: {}%", (size-bytes_left) * 100 / size);
     }
-    println!("\nAll done!");
+
+    let elapsed = start_time.elapsed().as_millis();
+    let seconds = elapsed / 1000;
+    let millis = elapsed - seconds * 1000;
+
+    println!("\nAll done! ({}s and {}ms)", seconds, millis);
 }
