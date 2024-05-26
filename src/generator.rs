@@ -1,14 +1,14 @@
 use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path};
 
-use crate::content::{PrintableCharProvider, BinaryProvider, ContentProvider};
+use crate::{content::{BinaryProvider, ContentProvider, PrintableCharProvider}, Args};
 
-pub fn generate_file(path_str: &str, size: usize, overwrite: bool, limit_charset: bool) {
-    match open_file(path_str, overwrite) {
+pub fn generate_file(args: Args) {
+    match open_file(&args.path, args.overwrite) {
         Ok(file) => {
-            if limit_charset {
-                write_content(file, size, &mut PrintableCharProvider::new());
+            if args.limit_charset {
+                write_content(file, args.size, &mut PrintableCharProvider::new());
             } else {
-                write_content(file, size, &mut BinaryProvider::new());
+                write_content(file, args.size, &mut BinaryProvider::new(args.always_use_default));
             }
         },
         Err(e) => {
@@ -18,7 +18,7 @@ pub fn generate_file(path_str: &str, size: usize, overwrite: bool, limit_charset
                 },
                 _ => {
                     let formatted_kind = e.kind().to_string().to_uppercase();
-                    println!("[{}] An error occured whilst trying to open or create file '{}'.", formatted_kind, path_str);
+                    println!("[{}] An error occured whilst trying to open or create file '{}'.", formatted_kind, args.path);
                 },
             }
         },
