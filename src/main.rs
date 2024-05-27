@@ -11,10 +11,13 @@ use crate::content::{BinaryProvider, ContentProvider, PrintableCharProvider};
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[arg(short, long)]
-    path: String,
+    path: Option<String>,
 
     #[arg(short, long)]
     size: String,
+
+    #[arg(short = 'v', long, default_value_t = 0.2)]
+    deviation_factor: f64,
 
     #[arg(short, long, default_value_t = false)]
     overwrite: bool,
@@ -28,38 +31,72 @@ pub struct Args {
 
 
 fn main() {
-    generate_file(Args::parse())
+    let args = Args::parse();
+
+    if args.deviation_factor < 0.0 || args.deviation_factor >= 1.0 {
+        println!("Deviation factor must fulfill the following rule: 0 <= x < 1");
+        return
+    }
+
+    generate_content(Args::parse())
 }
 
 
-pub fn generate_file(args: Args) {
-    match numbers::to_file_size(&args.size, 0.2)  {
+pub fn generate_content(args: Args) {
+    match numbers::to_file_size(&args.size, args.deviation_factor) {
         Some(size) => {
-            match open_file(&args.path, args.overwrite) {
-                Ok(file) => {
+            match open_output(&args) {
+                Ok((out, is_console)) => {
                     if args.limit_charset {
-                        write_content(file, size, &mut PrintableCharProvider::new());
+                        write_content(out, size, is_console, &mut PrintableCharProvider::new());
                     } else {
-                        write_content(file, size, &mut BinaryProvider::new(args.always_use_default));
-                    }
+                        write_content(out, size, is_console, &mut BinaryProvider::new(args.always_use_default));
+                    }                
                 },
                 Err(e) => {
                     match e.kind() {
+                        io::ErrorKind::InvalidInput => {
+                            println!("The provided file name is empty.");
+                        }
                         io::ErrorKind::AlreadyExists => {
                             println!("Aborting.");
                         },
+                        io::ErrorKind::PermissionDenied => {
+                            println!("You don't have permission to write to the file.");
+                        }
                         _ => {
                             let formatted_kind = e.kind().to_string().to_uppercase();
-                            println!("[{}] An error occured whilst trying to open file '{}'.", formatted_kind, args.path);
+                            println!("[{}] An error occured whilst trying to open the file.", formatted_kind);
                         },
                     }
-                },
-            };
+                }
+            }
         },
         None => {
             println!("Could not parse size string.");
         },
     }
+}
+
+fn open_output(args: &Args) -> io::Result<(Box<dyn Write>, bool)> {
+    let mut out: Box<dyn Write> = Box::from(io::stdout());
+    let mut is_console = true;
+    if let Some(path) = &args.path {
+        if path == "" {
+            return Err(io::Error::from(io::ErrorKind::InvalidInput))
+        }
+        let file_res = open_file(path, args.overwrite);
+        match file_res {
+            Ok(file) => {
+                out = Box::from(file);
+                is_console = false;
+            },
+            Err(e) => {
+                return Err(e);
+            },
+        };
+    }
+    Ok((Box::from(out), is_console))
 }
 
 fn open_file(path_str: &str, overwrite: bool) -> io::Result<File> {
@@ -94,8 +131,10 @@ fn read_user_input(input_string: &str) -> String {
         return trimmed_buf;
 }
 
-fn write_content(mut file: File, size: usize, content_provider: &mut impl ContentProvider) {
-    println!("Generating file... ({} Bytes)", size);
+fn write_content(mut out: impl Write, size: usize, log: bool, content_provider: &mut impl ContentProvider) {
+    if !log {
+        println!("Generating file... ({} Bytes)", size);
+    }
     let start_time = time::Instant::now();
 
     let mut bytes_left = size;
@@ -106,17 +145,21 @@ fn write_content(mut file: File, size: usize, content_provider: &mut impl Conten
         let mut buf = vec![0; batch_size];
 
         _ = content_provider.fill_buf(&mut buf);
-        _ = file.write(&buf);
+        _ = out.write(&buf);
 
         bytes_left -= batch_size;
 
-        print!("\rProgress: {}%", (size-bytes_left) * 100 / size);
+        if !log {
+            print!("\rProgress: {}%", (size-bytes_left) * 100 / size);
+        }
     }
-
+    _ = out.flush();
     let elapsed = start_time.elapsed().as_millis();
     let seconds = elapsed / 1000;
     let millis = elapsed - seconds * 1000;
 
-    println!("\nAll done! ({}s and {}ms)", seconds, millis);
+    if !log {
+        println!("\nAll done! ({}s and {}ms)", seconds, millis);
+    }
 }
 
