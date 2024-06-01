@@ -184,6 +184,9 @@ mod tests {
         assert_eq!(from(".456m".to_string(), 0.0), Some(456000));
         assert_eq!(from("123.m".to_string(), 0.0), None);
         assert_eq!(from("123.4567k".to_string(), 0.0), None);
+
+        let test_result_1 = from("123.456m".to_string(), 0.2).unwrap();
+        assert!(123455800 < test_result_1 && test_result_1 < 123456200)
     }
 
     #[test]
