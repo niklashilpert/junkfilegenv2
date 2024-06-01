@@ -1,4 +1,4 @@
-mod numbers;
+mod size;
 mod content;
 
 use std::{cmp::min, fs::{self, File, OpenOptions}, io::{self, Write}, path::Path, time};
@@ -22,7 +22,7 @@ pub struct Args {
     #[arg(short, long, default_value_t = false)]
     overwrite: bool,
 
-    #[arg(short = 'l', long, default_value_t = false)]
+    #[arg(short, long, default_value_t = false)]
     limit_charset: bool,
 
     #[arg(short = 'd', long, default_value_t = false)]
@@ -43,7 +43,7 @@ fn main() {
 
 
 pub fn generate_content(args: Args) {
-    match numbers::to_file_size(&args.size, args.deviation_factor) {
+    match size::from((&args.size).to_string(), args.deviation_factor) {
         Some(size) => {
             match open_output(&args) {
                 Ok((out, is_console)) => {
