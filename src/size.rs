@@ -68,7 +68,7 @@ pub fn from(input: String, deviation: f64) -> Option<usize> {
 /// 
 /// **Note**: If there is no dot in the string, the number in the string will be returned in the *second capture* (number to the right of the dot).
 fn capture_parts<'a> (input: String) -> Option<(Option<String>, Option<String>, Option<String>)> {
-    /* Capture Groups in the regex string: 
+    /* Capture groups in the regex string: 
      * 0: 123.456m  (whole string -> unused)
      * 1: 123.      (with dot -> unused)
      * 2: 123       (without dot -> left of dot)

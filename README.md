@@ -8,13 +8,13 @@ With this tool, you can create files filled with random characters. This can hel
 To generate a file, compile the project and execute it with the following commandline arguments:
 
 ```
-./junkfilegenv2 -p <path of the file> -s <size in bytes> [-o] [-l] [-d]
+./junkfilegenv2 -s <size in bytes> [-p <path of the file>] [-o] [-l] [-d]
 ```
 
 Explanation of the parameters:
 
-- the `-p` parameter specifies the path of the file to be created.
 - the `-s` parameter specifies the size of the file. Can look like this: 123.456M, 123,456k or just 123M. The units available are K, M and G. To refer to bytes, leave out the unit: 1234.
+- the `-p` parameter specifies the path of the file to be created. If this is omitted, the content will be written into stdout.
 - the `-o` flag tells the program to always generate the file even if another file already exists at the given path. If this flag is not set, you will be prompted during execution.
 - the `-l` flag changes the rng generator to only output readable characters. See `PRINTABLE_CHARS` string in `content.rs`.
 - the `-d` flag tells the program to always use `rand` as the option to retrieve random bytes.

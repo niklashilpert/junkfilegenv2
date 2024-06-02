@@ -74,6 +74,9 @@ pub fn generate_content(args: Args) {
         },
         None => {
             println!("Could not parse size string.");
+            println!("The following syntax is allowed: \"<number.<number><unit>.\"");
+            println!("Examples: \"123.456m\", \"123K\", \".456g\", \"123\"");
+            println!("The number must be an integer.");
         },
     }
 }
